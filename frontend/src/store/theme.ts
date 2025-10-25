@@ -32,5 +32,4 @@ export const useTheme = create<ThemeState>((set, get) => ({
   }
 }));
 
-// Immediately sync the document on first import
 applyTheme(readStoredTheme());
