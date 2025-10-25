@@ -1,36 +1,73 @@
 import React from "react";
 import useFamily from "../store/family";
 import useInvites from "../store/invites";
+import useList from "../store/list";
 
 export default function Settings() {
   const { family, members, getMine, leave } = useFamily();
-  const { generate } = useInvites();
-  const [generatedInvite, setGeneratedInvite] = React.useState<{ invite: { token: string; expiresAt: string; email?: string }; link: string } | null>(null);
+  const { generate, sentInvites, fetchSentInvites } = useInvites();
+  const resetWeek = useList((state) => state.resetWeek);
+  const fetchArchives = useList((state) => state.fetchArchives);
+
+  const [generatedInvite, setGeneratedInvite] = React.useState<{
+    invite: { token: string; expiresAt: string; email?: string };
+    link: string;
+  } | null>(null);
   const [inviteEmail, setInviteEmail] = React.useState("");
   const [inviteStatus, setInviteStatus] = React.useState<string | null>(null);
   const [inviteLoading, setInviteLoading] = React.useState(false);
-  const createdAt = family && (family as any).createdAt ? new Date((family as any).createdAt).toLocaleDateString() : null;
+  const [resetStatus, setResetStatus] = React.useState<string | null>(null);
+  const [resetLoading, setResetLoading] = React.useState(false);
+
+  const createdAt = (family as any)?.createdAt
+    ? new Date((family as any).createdAt).toLocaleDateString()
+    : null;
 
   React.useEffect(() => {
     getMine();
-  }, []);
+  }, [getMine]);
 
-  async function handleInvite() {
-    if (!inviteEmail.trim()) {
-      setInviteStatus("Please enter an email address.");
+  React.useEffect(() => {
+    if (family) {
+      fetchSentInvites();
+      fetchArchives();
+    }
+  }, [family, fetchSentInvites, fetchArchives]);
+
+  async function handleInvite(email?: string) {
+    const trimmed = email?.trim();
+    if (email !== undefined && !trimmed) {
+      setInviteStatus("Please enter a valid email or generate a token without email.");
       return;
     }
     setInviteLoading(true);
     setInviteStatus(null);
     try {
-      const result = await generate(inviteEmail.trim());
+      const result = await generate(trimmed);
       setGeneratedInvite(result);
-      setInviteStatus(`Invitation sent to ${inviteEmail.trim()}. Share the link below.`);
-      setInviteEmail("");
+      if (trimmed) {
+        setInviteStatus(`Invitation sent to ${trimmed}. Share the link or copy the token.`);
+        setInviteEmail("");
+      } else {
+        setInviteStatus("Token generated. Share it with the person you want to invite.");
+      }
     } catch (error: any) {
       setInviteStatus(error?.message || "Unable to generate invite.");
     } finally {
       setInviteLoading(false);
+    }
+  }
+
+  async function handleResetWeek() {
+    setResetLoading(true);
+    setResetStatus(null);
+    try {
+      await resetWeek();
+      setResetStatus("Current list archived and a fresh week has started.");
+    } catch (error: any) {
+      setResetStatus(error?.message || "Unable to archive list.");
+    } finally {
+      setResetLoading(false);
     }
   }
 
@@ -148,6 +185,23 @@ export default function Settings() {
         </div>
 
         <div className="glass-card">
+          <h2 className="text-xl font-semibold">Weekly reset</h2>
+          <p className="muted text-sm mt-1">
+            Archive the current shopping list and start a brand-new week.
+          </p>
+          <button
+            className="btn mt-4 w-full"
+            onClick={handleResetWeek}
+            disabled={resetLoading}
+          >
+            {resetLoading ? "Archiving..." : "Archive current list & start new week"}
+          </button>
+          {resetStatus && (
+            <p className="muted text-sm mt-3">{resetStatus}</p>
+          )}
+        </div>
+
+        <div className="glass-card">
           <h2 className="text-xl font-semibold text-red-500">Leave family group</h2>
           <p className="muted text-sm mt-1">
             If you leave, you’ll lose access to all shared lists. You can rejoin with a new invite.
@@ -156,6 +210,49 @@ export default function Settings() {
             Leave family
           </button>
         </div>
+      </div>
+
+      <div className="glass-card">
+        <h2 className="text-xl font-semibold">Active invite tokens</h2>
+        <p className="muted text-sm mt-1">
+          Share these tokens or links with family members who still need to join.
+        </p>
+        {sentInvites.length === 0 ? (
+          <p className="muted-sm mt-4">You haven't generated any tokens yet.</p>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {sentInvites.map((invite) => (
+              <div
+                key={invite.token}
+                className="list-row flex-col items-start gap-3 sm:flex-row sm:items-center"
+              >
+                <div className="space-y-1">
+                  <p className="font-medium">
+                    {invite.email ? `Sent to ${invite.email}` : "Manual token"}
+                  </p>
+                  <p className="muted-sm">
+                    Expires on {new Date(invite.expiresAt).toLocaleDateString()}
+                  </p>
+                  <p className="font-mono text-xs break-all">{invite.token}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    className="btn-secondary px-3 py-2 text-sm"
+                    onClick={() => navigator.clipboard.writeText(invite.token)}
+                  >
+                    Copy token
+                  </button>
+                  <button
+                    className="btn-secondary px-3 py-2 text-sm"
+                    onClick={() => navigator.clipboard.writeText(`${window.location.origin}/invite/${invite.token}`)}
+                  >
+                    Copy link
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
