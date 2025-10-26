@@ -23,4 +23,4 @@ jobs:
           - name: test backend status
             run : |
                 cd backend
-                pm2 start index.js
+                pm2 start server.js
