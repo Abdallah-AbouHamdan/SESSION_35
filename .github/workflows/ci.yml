@@ -15,7 +15,7 @@ jobs:
                 cd backend 
                 npm i 
                 cd ..
-                
+
           - name: intall the frontend dependencies
             run : |
                 cd frontend 
@@ -29,5 +29,5 @@ jobs:
             run : |
                 cd backend
                 npm i
-                pm2 start server.js
+                pm2 start src/server.js
     
