@@ -14,7 +14,13 @@ jobs:
             run : |
                 cd backend 
                 npm i 
+                cd ..
           - name: intall the frontend dependencies
             run : |
                 cd frontend 
                 npm i 
+                cd ..
+          - name: test backend status
+            run : |
+                cd backend
+                pm2 start index.js
