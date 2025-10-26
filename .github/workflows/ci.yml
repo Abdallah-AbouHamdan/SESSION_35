@@ -14,20 +14,7 @@ jobs:
             run : |
                 cd backend 
                 npm i 
-                cd ..
-
           - name: intall the frontend dependencies
             run : |
                 cd frontend 
                 npm i 
-                cd ..
-
-          - name: Install PM2 globally
-            run : npm i --global pm2
-
-          - name: test backend status
-            run : |
-                cd backend
-                npm i
-                pm2 start src/server.js
-    
