@@ -18,8 +18,11 @@ export default function Header() {
   }, [currentUser, fetchMyInvites]);
 
   return (
-    <header className="nav-shell">
-      <Link to={currentUser ? "/app" : "/"} className="flex items-center gap-3">
+    <header className="nav-shell flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <Link
+        to={currentUser ? "/app" : "/"}
+        className="flex w-full items-center justify-center gap-3 sm:w-auto sm:justify-start"
+      >
         <span className="auth-icon text-xl">🛒</span>
         <div className="leading-tight">
           <p className="text-sm font-medium text-muted">FamilyCart</p>
@@ -27,12 +30,12 @@ export default function Header() {
         </div>
       </Link>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
         {currentUser && (
           <>
             <Link
               to="/invites"
-              className="btn-secondary flex items-center gap-2 text-sm"
+              className="btn-secondary flex items-center gap-2 text-sm shrink-0"
             >
               <Mail size={16} />
               Invites
@@ -44,14 +47,14 @@ export default function Header() {
             </Link>
             <Link
               to="/settings"
-              className="btn-secondary flex items-center gap-2 text-sm"
+              className="btn-secondary flex items-center gap-2 text-sm shrink-0"
             >
               <SettingsIcon size={16} />
               Settings
             </Link>
             <Link
               to="/archive"
-              className="btn-secondary flex items-center gap-2 text-sm"
+              className="btn-secondary flex items-center gap-2 text-sm shrink-0"
             >
               <ArchiveIcon size={16} />
               Archive
@@ -61,19 +64,19 @@ export default function Header() {
 
         <button
           onClick={toggle}
-          className="btn-secondary px-3 py-2"
+          className="btn-secondary px-3 py-2 shrink-0"
           title="Toggle theme"
         >
           {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
         {!currentUser ? (
-          <Link to="/login" className="btn">
+          <Link to="/login" className="btn shrink-0">
             Sign In
           </Link>
         ) : (
           <button
-            className="btn"
+            className="btn shrink-0"
             onClick={() => {
               logout();
               navigate("/login");

@@ -27,6 +27,8 @@ type State = {
   fetchArchives: () => Promise<void>;
   addItem: (i: Partial<Item>) => Promise<void>;
   toggle: (id: string) => Promise<void>;
+  updateItem: (id: string, updates: Partial<Item>) => Promise<void>;
+  remove: (id: string) => Promise<void>;
   resetWeek: () => Promise<void>;
 };
 
@@ -56,6 +58,17 @@ const useList = create<State>((set, get) => ({
   },
   async toggle(id) {
     await fetchApi(`/api/items/${id}/toggle`, { method: "PATCH" });
+    await get().fetchActive();
+  },
+  async updateItem(id, updates) {
+    await fetchApi(`/api/items/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(updates),
+    });
+    await get().fetchActive();
+  },
+  async remove(id) {
+    await fetchApi(`/api/items/${id}`, { method: "DELETE" });
     await get().fetchActive();
   },
   async fetchArchives() {

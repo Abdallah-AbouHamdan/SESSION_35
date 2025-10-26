@@ -29,6 +29,34 @@ r.post("/", async (req, res) => {
   res.json(ins.rows[0]);
 });
 
+r.patch("/:id", async (req, res) => {
+  const { id } = req.params;
+  const allowed = ["title", "quantity", "category", "notes"];
+  const updates = [];
+  const values = [];
+
+  allowed.forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+      updates.push(`${field}=$${updates.length + 1}`);
+      values.push(req.body[field]);
+    }
+  });
+
+  if (updates.length === 0) {
+    return res.status(400).json({ error: "No fields to update" });
+  }
+
+  values.push(id);
+  const updated = await q(
+    `update shopping_item set ${updates.join(", ")} where id=$${values.length} returning id,title,quantity,category,notes,status`,
+    values
+  );
+  if (updated.rowCount === 0) {
+    return res.status(404).json({ error: "Item not found" });
+  }
+  res.json(updated.rows[0]);
+});
+
 r.patch("/:id/toggle", async (req, res) => {
   const { id } = req.params;
   const row = await q(
