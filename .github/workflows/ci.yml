@@ -1,0 +1,20 @@
+name : full stack CI
+on:
+    pull_request:
+        branches: [ main ]
+jobs:
+    ci-test:
+        timeout-minutes: 10
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4.0.0
+                
+          - name: intall the backend dependencies
+            run : |
+                cd backend 
+                npm i 
+          - name: intall the frontend dependencies
+            run : |
+                cd frontend 
+                npm i 
