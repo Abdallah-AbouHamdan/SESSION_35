@@ -1,33 +1,71 @@
-name : full stack CI
+name: Full Stack CI
+
 on:
-    pull_request:
-        branches: [ main ]
+  pull_request:
+    branches: [main]
+
 jobs:
-    ci-test:
-        timeout-minutes: 10
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v4.0.0
-                
-          - name: intall the backend dependencies
-            run : |
-                cd backend 
-                npm i 
-                cd ..
+  ci-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-          - name: intall the frontend dependencies
-            run : |
-                cd frontend 
-                npm i 
-                cd ..
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-          - name: Install PM2 globally
-            run : npm i --global pm2
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
 
-          - name: test backend status
-            run : |
-                cd backend
-                npm i
-                pm2 start src/server.js
-    
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Install PM2 globally
+        run: npm install --global pm2
+
+      - name: Backend smoke test
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CLIENT_ORIGIN: ${{ secrets.CLIENT_ORIGIN }}
+          PORT: 4000
+        run: |
+          set -euo pipefail
+          export CLIENT_ORIGIN=${CLIENT_ORIGIN:-http://localhost:5173}
+          export JWT_SECRET=${JWT_SECRET:-test-secret}
+          export PORT=${PORT:-4000}
+
+          pm2 delete backend >/dev/null 2>&1 || true
+          pm2 start src/server.js --name backend --update-env
+
+          cleanup() {
+            pm2 delete backend >/dev/null 2>&1 || true;
+          }
+          trap cleanup EXIT
+
+          ready=false
+          for attempt in {1..10}; do
+            if curl --fail --silent http://localhost:${PORT}/ >/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+
+          if [ "$ready" = false ]; then
+            pm2 logs backend --lines 100 || true
+            echo "Backend did not become ready" >&2
+            exit 1
+          fi
+
+          echo "Backend responded successfully"
