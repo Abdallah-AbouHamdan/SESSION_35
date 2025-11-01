@@ -37,10 +37,13 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="label">Email</label>
+            <label className="label" htmlFor="login-email">
+              Email
+            </label>
             <div className="relative">
               <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
+                id="login-email"
                 type="email"
                 className="input pl-10"
                 value={email}
@@ -52,10 +55,13 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="label">Password</label>
+            <label className="label" htmlFor="login-password">
+              Password
+            </label>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
+                id="login-password"
                 type="password"
                 className="input pl-10"
                 value={password}

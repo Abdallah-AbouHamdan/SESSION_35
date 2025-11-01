@@ -68,10 +68,13 @@ export default function Register() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="label">Full Name</label>
+            <label className="label" htmlFor="register-name">
+              Full Name
+            </label>
             <div className="relative">
               <UserRound size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
+                id="register-name"
                 className="input pl-10"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -82,10 +85,13 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="label">Email</label>
+            <label className="label" htmlFor="register-email">
+              Email
+            </label>
             <div className="relative">
               <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
+                id="register-email"
                 type="email"
                 className="input pl-10"
                 value={formData.email}
@@ -97,10 +103,13 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="label">Password</label>
+            <label className="label" htmlFor="register-password">
+              Password
+            </label>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
+                id="register-password"
                 type="password"
                 className="input pl-10"
                 value={formData.password}
@@ -112,10 +121,13 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="label">Confirm Password</label>
+            <label className="label" htmlFor="register-confirm">
+              Confirm Password
+            </label>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
+                id="register-confirm"
                 type="password"
                 className="input pl-10"
                 value={formData.confirmPassword}
