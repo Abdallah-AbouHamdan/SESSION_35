@@ -32,7 +32,7 @@ jobs:
       - name: Install PM2 globally
         run: npm install --global pm2
 
-      - name: Backend smoke test
+      - name: Backend test
         working-directory: backend
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}

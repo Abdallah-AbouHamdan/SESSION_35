@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { createMockApi } from './helpers/mockApi';
 
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const PASSWORD = 'Playwright!123';
 
 test('happy path: register, invite, join, manage list', async ({ page, browser }, testInfo) => {
@@ -33,7 +35,9 @@ test('happy path: register, invite, join, manage list', async ({ page, browser }
     await page.goto('/gate', { waitUntil: 'networkidle' });
     await page.getByPlaceholder('e.g., The Martinez Crew').fill(familyName);
     await page.getByRole('button', { name: /Create Family Group/i }).click();
-    await expect(page.getByText(/Family created/i)).toBeVisible();
+    await expect(
+      page.getByText(new RegExp(`You already belong to ${escapeRegExp(familyName)}`))
+    ).toBeVisible();
   });
 
   let inviteToken = '';
@@ -85,7 +89,7 @@ test('happy path: register, invite, join, manage list', async ({ page, browser }
     await userBPage.getByRole('button', { name: /Join Family/i }).click();
     await acceptResponsePromise;
     await expect(
-      userBPage.getByText(new RegExp(`You already belong to ${familyName}`)),
+      userBPage.getByText(new RegExp(`You already belong to ${escapeRegExp(familyName)}`)),
     ).toBeVisible();
   });
 
